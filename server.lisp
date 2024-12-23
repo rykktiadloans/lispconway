@@ -26,6 +26,8 @@
 
                                ))
 
+;; Game of life stuff
+
 (defun print-field ()
   "Prints the whole field to the standard output"
   (loop for i from 0 below (* *size* *size*) do 
@@ -88,20 +90,38 @@
                   (next-step-new-cell x y))))
     (setf *field* new-field)))
 
-(defmacro newline ()
-  "Output newline to the standard output"
-  `(format t "~A" #\newline))
+;; Server stuff
+(ql:quickload "usocket")
+
+(defun field-to-cons () 
+  "Converts a field into a list of cons pairs, where each pair contains the coordinates of an alive cell"
+  (loop for i from 0 below (* *size* *size*) 
+        for x = (mod i *size*)
+        for y = (floor (/ (float i) (float *size*)))
+        if (eq (get-cell-value x y) t)
+        collect (cons x y)))
+
+;; Mainloop 
 
 (defun main () 
   "Main function"
   (format t "==> Start~A" #\newline)
   (setf *field* (make-array (* *size* *size*) :initial-element nil))
   (default-game-init)
-  (loop repeat 50 do 
-        (next-step)
-        (format t "~v@{~A~:*~}" *size* "-")
-        (newline)
-        (print-field)
-        (sleep 0.5)))
-
-;(main)
+  (let* ((socket (usocket:socket-listen "127.0.0.1" 5000))
+         (connection (usocket:socket-accept socket :element-type 'character)))
+    (unwind-protect 
+        (progn 
+          (loop repeat 50 do 
+           (format (usocket:socket-stream connection) "~A" (field-to-cons)) 
+           (force-output (usocket:socket-stream connection)) 
+           (format t "~v@{~A~:*~}~%" *size* "-") 
+           (print-field) 
+           (next-step) 
+           (format t "cum~%")
+           (sleep 5)
+           ))
+      (progn
+        (format t "==> Closing socket~%")
+        (usocket:socket-close connection)
+        (usocket:socket-close socket)))))
