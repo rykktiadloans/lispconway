@@ -50,17 +50,16 @@
 
 (defun main ()
   "Main function"
-  (format t "==> Start~%")
-  (let ((socket (usocket:socket-connect "127.0.0.1" 5000 :element-type 'character)))
+  (let ((socket (usocket:socket-connect "127.0.0.1" 5500 :element-type 'character)))
     (unwind-protect
         (progn 
-          (loop repeat 50 do
+          (format t "==> Start~%")
+          (loop do
            (usocket:wait-for-input socket)
            (load-state (usocket:socket-stream socket))
-           (format t "~v@{~A~:*~}~%" *size* "-") 
            (field-init)
+           (format t "~v@{~A~:*~}~%" *size* "-") 
            (print-field)
-           (format t "piss~%")
            (clear-field))
       (progn 
        (format t "==> Closing socket~%")
