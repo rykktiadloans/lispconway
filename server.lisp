@@ -107,7 +107,7 @@
   "Main function"
   (setf *field* (make-array (* *size* *size*) :initial-element nil))
   (default-game-init)
-  (let* ((socket (usocket:socket-listen "127.0.0.1" 5000 :reuse-address t))
+  (let* ((socket (usocket:socket-listen "127.0.0.1" 5000 ))
          (connection (usocket:socket-accept socket :element-type 'character)))
     (unwind-protect 
         (progn 

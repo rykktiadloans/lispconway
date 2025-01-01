@@ -60,7 +60,7 @@
            (field-init)
            (format t "~v@{~A~:*~}~%" *size* "-") 
            (print-field)
-           (clear-field))
+           (clear-field)))
       (progn 
        (format t "==> Closing socket~%")
-       (usocket:socket-close socket))))))
+       (usocket:socket-close socket)))))
