@@ -107,18 +107,18 @@
   "Main function"
   (setf *field* (make-array (* *size* *size*) :initial-element nil))
   (default-game-init)
-  (let* ((socket (usocket:socket-listen "127.0.0.1" 5500))
+  (let* ((socket (usocket:socket-listen "127.0.0.1" 5000 :reuse-address t))
          (connection (usocket:socket-accept socket :element-type 'character)))
     (unwind-protect 
         (progn 
           (format t "==> Start~A" #\newline)
-          (loop do 
+          (loop do
            (format (usocket:socket-stream connection) "~A" (field-to-cons)) 
            (force-output (usocket:socket-stream connection)) 
+           (sleep 1)
+           (print-field)
            (format t "=> State sent~%") 
-           (next-step) 
-           (sleep 0.5)
-           ))
+           (next-step)))
       (progn
         (format t "==> Closing socket~%")
         (usocket:socket-close connection)
