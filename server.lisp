@@ -26,6 +26,22 @@
 
                                ))
 
+;; Helpers
+
+
+(defun any-equals (main predicate &rest rest)
+  "Returns true if the first argument is equal to any of the rest arguments"
+  (cond
+    ((= (length rest) 0) nil)
+    ((= (length rest) 1) (funcall predicate main (first rest)))
+    ((> (length rest) 1) 
+     (let ((res (funcall predicate main (first rest))))
+       (if res 
+           t
+           (apply #'any-equals main predicate (rest rest)))))
+    ))
+
+
 ;; Game of life stuff
 
 (defun print-field ()
@@ -116,7 +132,7 @@
            (format (usocket:socket-stream connection) "~A" (field-to-cons)) 
            (force-output (usocket:socket-stream connection)) 
            (sleep 1)
-           (print-field)
+           (if (any-equals (first (uiop:command-line-arguments)) #'string= "-p" "--print-state") (print-field))
            (format t "=> State sent~%") 
            (next-step)))
       (progn
